@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 import matplotlib.pyplot as plt
 
 src = cv2.imread('lena.BMP')
@@ -13,4 +12,3 @@ cv2.destroyAllWindows()
 # 像素级一般是256，表示[0, 255]
 plt.hist(src.ravel(), 256)
 plt.show()
-

@@ -1,6 +1,7 @@
+from math import *
+
 import cv2
 import numpy as np
-from math import *
 
 
 def read_img(filename):

@@ -1,7 +1,8 @@
 # 要用到三个包
-import numpy as np
 import struct
+
 import matplotlib.pyplot as plt
+import numpy as np
 
 f = open('彩色lena图像256色.BMP',
          'rb')  # python要加两个\\
