@@ -2,16 +2,16 @@ import struct
 
 import matplotlib.pyplot as plt
 
-# 读取 lena 图，并显示
-lena = plt.imread('彩色lena图像256色.BMP')
-plt.imshow(lena)  # 调用图片显示函数
-plt.axis('off')  # 不显示坐标轴
-plt.show()
-
-with open('彩色lena图像256色.BMP', 'rb') as f:
-    s = f.read(30)
-
-print(s)
+# # 读取 lena 图，并显示
+# lena = plt.imread('彩色lena图像256色.BMP')
+# plt.imshow(lena)  # 调用图片显示函数
+# plt.axis('off')  # 不显示坐标轴
+# plt.show()
+#
+# with open('../彩色lena图像256色.BMP', 'rb') as f:
+#     s = f.read(30)
+#
+# print(s)
 
 
 # bytes 字节串，以字节为单位，和字符串类似
@@ -38,7 +38,7 @@ def bmp_info():
             'biBitCount': unpackbuf[9]
         }
 
-
-bi = bmp_info()
-print(bi)
-print(bi['biWidth'], bi['biHeight'], bi['biBitCount'])
+#
+# bi = bmp_info()
+# print(bi)
+# print(bi['biWidth'], bi['biHeight'], bi['biBitCount'])

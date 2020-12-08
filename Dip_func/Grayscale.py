@@ -14,6 +14,14 @@ alpha = np.ones((256, 256, 1)) * 255
 # 1.分量法
 # 该方法最为简单，即在R、G、B三种颜色分量中，任意选取一种颜色作为灰度值
 def weight(color):
+    """
+
+    Args:
+        color:
+
+    Returns:
+
+    """
     if color == 'R':
         rgb = np.reshape(r, (256, 256, 1))
     elif color == 'G':
@@ -30,6 +38,11 @@ def weight(color):
 # 2.最大值法
 # 该方法是先找出每个像素R、G、B三种颜色分量的值，然后找到值最大的那个颜色，然后以此最大值作为灰度值
 def max_rgb():
+    """
+
+    Returns:
+
+    """
     rgb = np.max(lena[:, :, :3], axis=2)
     rgb = np.reshape(rgb, (256, 256, 1))
     lena_gray_max = np.concatenate([rgb, rgb, rgb, alpha], axis=2).astype(int)

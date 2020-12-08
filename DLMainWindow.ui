@@ -1,0 +1,225 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>DLMainWindow</class>
+ <widget class="QMainWindow" name="DLMainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1333</width>
+    <height>558</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>DIP_Lab</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QWidget" name="LabCtrlWidget" native="true">
+      <property name="minimumSize">
+       <size>
+        <width>350</width>
+        <height>0</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>350</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>80</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>实验类型：</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QComboBox" name="ExpTypeComboBox"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QLabel" name="label_3">
+           <property name="minimumSize">
+            <size>
+             <width>80</width>
+             <height>0</height>
+            </size>
+           </property>
+           <property name="maximumSize">
+            <size>
+             <width>80</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>实验图片：</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="ExpImgLineEdit">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="SelectImgPushButton">
+           <property name="text">
+            <string>选择</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>TextLabel</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="QPushButton" name="LoadTestDataPushButton">
+           <property name="text">
+            <string>载入测试数据</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="GoExpPushButton">
+           <property name="text">
+            <string>进行实验</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QWidget" name="ImgShowWidget" native="true">
+      <widget class="QSplitter" name="splitter">
+       <property name="geometry">
+        <rect>
+         <x>64</x>
+         <y>134</y>
+         <width>154</width>
+         <height>17</height>
+        </rect>
+       </property>
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <widget class="QLabel" name="SrcImgLabel">
+        <property name="text">
+         <string>SrcImgLabel</string>
+        </property>
+       </widget>
+       <widget class="QLabel" name="DstImgLabel">
+        <property name="text">
+         <string>DstImgLabel</string>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1333</width>
+     <height>29</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menu">
+    <property name="title">
+     <string>文件(F)</string>
+    </property>
+    <addaction name="action_O"/>
+    <addaction name="action_S"/>
+    <addaction name="action_E"/>
+   </widget>
+   <widget class="QMenu" name="menu_G">
+    <property name="title">
+     <string>几何变换(G)</string>
+    </property>
+    <addaction name="action"/>
+    <addaction name="action_2"/>
+    <addaction name="action_3"/>
+   </widget>
+   <addaction name="menu"/>
+   <addaction name="menu_G"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="action_O">
+   <property name="text">
+    <string>打开(&amp;O)</string>
+   </property>
+  </action>
+  <action name="action_S">
+   <property name="text">
+    <string>另存为(S)</string>
+   </property>
+  </action>
+  <action name="action_E">
+   <property name="text">
+    <string>退出(Q)</string>
+   </property>
+  </action>
+  <action name="action">
+   <property name="text">
+    <string>缩放</string>
+   </property>
+  </action>
+  <action name="action_2">
+   <property name="text">
+    <string>旋转</string>
+   </property>
+  </action>
+  <action name="action_3">
+   <property name="text">
+    <string>镜像</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+ <slots>
+  <slot>open_image()</slot>
+ </slots>
+</ui>

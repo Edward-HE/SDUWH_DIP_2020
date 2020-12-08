@@ -42,11 +42,10 @@ def img_translation(img, angle):
     res = cv2.warpAffine(img, matrix, (width_new, height_new))
     return res
 
-
-lena = read_img('彩色lena图像256色.BMP')
-
-lena_res = img_scale(lena, 0.2)
-# lena_res = img_translation(lena, 30)  # 逆时针旋转
-cv2.imshow('lena_origin', lena)
-cv2.imshow('lena_res', lena_res)
-cv2.waitKey(0)
+# lena = read_img('../彩色lena图像256色.BMP')
+#
+# lena_res = img_scale(lena, 0.2)
+# # lena_res = img_translation(lena, 30)  # 逆时针旋转
+# cv2.imshow('lena_origin', lena)
+# cv2.imshow('lena_res', lena_res)
+# cv2.waitKey(0)
