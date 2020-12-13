@@ -1,14 +1,15 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-# 读取 lena 图，并显示
-lena = plt.imread('彩色lena图像256色.BMP')
-plt.imshow(lena)  # 调用图片显示函数
-plt.axis('off')  # 不显示坐标轴
-# plt.show()
-print(lena)
-r, g, b = [lena[:, :, i] for i in range(3)]
-alpha = np.ones((256, 256, 1)) * 255
+
+# # 读取 lena 图，并显示
+# lena = plt.imread('彩色lena图像256色.BMP')
+# plt.imshow(lena)  # 调用图片显示函数
+# plt.axis('off')  # 不显示坐标轴
+# # plt.show()
+# print(lena)
+# r, g, b = [lena[:, :, i] for i in range(3)]
+# alpha = np.ones((256, 256, 1)) * 255
 
 
 # 1.分量法
@@ -67,12 +68,11 @@ def weighted_average():
     lena_gray_wa /= 255
     return lena_gray_wa
 
-
-# lena_gray = weight('R')
-lena_gray = average_rgb()
-# lena_gray = weighted_average()
-# print(lena_gray.shape)
-# print(lena_gray)
-plt.imshow(lena_gray)
-plt.axis('off')
-plt.show()
+# # lena_gray = weight('R')
+# lena_gray = average_rgb()
+# # lena_gray = weighted_average()
+# # print(lena_gray.shape)
+# # print(lena_gray)
+# plt.imshow(lena_gray)
+# plt.axis('off')
+# plt.show()

@@ -18,6 +18,22 @@ import Dip_func
 from Dip_func import geometric_transformation, gray_histogram, gray_histogram_opencv, Grayscale, show_img
 
 
+def read_img_opencv(filename):
+    """
+    Desc:
+        读取图像函数，使用 imdecode读取，避免OpenCV在Windows下不支持中文路径的问题
+
+    Args:
+        filename:
+
+    Returns:
+
+    """
+
+    img = cv2.imdecode(np.fromfile(filename, dtype=np.uint8), -1)
+    return img
+
+
 class DipLabFunc(QMainWindow, Ui_DLMainWindow):
 
     def __init__(self, parent=None):
@@ -28,13 +44,19 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
 
         self.SrcImgLabel.clear()
         self.DstImgLabel.clear()
+        self.label_info.clear()
 
         self.src_img_path = ""
-        self.src_img = QPixmap()
-        self.dst_img = QPixmap()
+        self.src_img = None
+        self.dst_img = None
+        self.src_pix = QPixmap()
+        self.dst_pix = QPixmap()
 
+        self.action_show_info.triggered.connect(self.show_image_info)
         self.action_O.triggered.connect(self.open_image)
         self.SelectImgPushButton.clicked.connect(self.open_image)
+        self.action_scale.triggered.connect(self.image_scale)
+        self.action_rotate.triggered.connect(self.image_rotate)
 
     def win_to_center(self):
         """
@@ -67,16 +89,18 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         if len(self.src_img_path) == 0:
             return
         self.ExpImgLineEdit.setText(self.src_img_path)
-        if self.src_img.load(self.src_img_path) is False:
+        self.src_img = read_img_opencv(self.src_img_path)
+        self.dst_img = self.src_img
+        if self.src_pix.load(self.src_img_path) is False:
             QMessageBox.warning(self, "打开图片失败", "请检查图片格式后重新打开")
             return
         else:
-            self.dst_img = self.src_img.copy(self.src_img.rect())
+            self.dst_pix = self.src_pix.copy(self.src_pix.rect())
             self.resizeEvent(None)
-            # image = self.src_img.scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(), Qt.KeepAspectRatio,
-            #                             Qt.SmoothTransformation)
-            # self.SrcImgLabel.setPixmap(image)
-            # self.DstImgLabel.setPixmap(image)
+            image = self.src_pix.scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(), Qt.KeepAspectRatio,
+                                        Qt.SmoothTransformation)
+            self.SrcImgLabel.setPixmap(image)
+            self.DstImgLabel.setPixmap(image)
 
     def resizeEvent(self, QResizeEvent):
         """
@@ -99,11 +123,55 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.DstImgLabel.resize(widget_width / 2, widget_height)
         self.DstImgLabel.move(widget_width / 2, 0)
         if len(self.src_img_path) != 0:
-            image = self.src_img.scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(), Qt.KeepAspectRatio,
+            image = self.src_pix.scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(), Qt.KeepAspectRatio,
                                         Qt.SmoothTransformation)
             self.SrcImgLabel.setPixmap(image)
-            self.DstImgLabel.setPixmap(image)
+            # self.DstImgLabel.setPixmap(image)
 
     def show_image_info(self):
-        return
-    # s = show_img.bmp_info()
+        """
+        Desc:
+            读取位图的头部数据并解码，将得到的位图信息显示在界面中的label_info中
+
+        Returns:
+
+        """
+        image_info_dict = show_img.bmp_info(self.src_img_path)
+        image_info_list = ""
+        for key in image_info_dict:
+            list_item = str(key) + ':' + str(image_info_dict[key]) + '\n'
+            image_info_list += list_item
+        self.label_info.setText(image_info_list)
+
+    def image_scale(self, multiples):
+        """
+        Desc:
+            对图片执行缩放处理
+
+        Returns:
+
+        """
+        print(self.dst_img.shape)
+
+        self.dst_img = geometric_transformation.img_scale(self.src_img, 2)
+        print(self.dst_img.shape)
+        shrink = cv2.cvtColor(self.dst_img, cv2.COLOR_BGR2RGB)
+        dst_q_image = QtGui.QImage(shrink.data,
+                                   shrink.shape[1],
+                                   shrink.shape[0],
+                                   shrink.shape[1] * 3, QtGui.QImage.Format_RGB888)
+        self.dst_pix = QtGui.QPixmap.fromImage(dst_q_image)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_rotate(self, angle):
+        self.dst_img = geometric_transformation.img_translation(self.src_img, 45)
+        print(self.dst_img.shape)
+        shrink = cv2.cvtColor(self.dst_img, cv2.COLOR_BGR2RGB)
+        dst_q_image = QtGui.QImage(shrink.data,
+                                   shrink.shape[1],
+                                   shrink.shape[0],
+                                   shrink.shape[1] * 3, QtGui.QImage.Format_RGB888)
+        self.dst_pix = QtGui.QPixmap.fromImage(dst_q_image).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                                   Qt.KeepAspectRatio,
+                                                                   Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)

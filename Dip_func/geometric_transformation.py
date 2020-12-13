@@ -32,13 +32,13 @@ def img_translation(img, angle):
     # 获取旋转矩阵，这个函数可以自动求出旋转矩阵
     # 第一个参数是旋转中心，第二个参数是旋转角度，第三个参数是缩放比例
     matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
-    print(matrix.shape)
-    print(matrix)
+    # print(matrix.shape)
+    # print(matrix)
 
     matrix[0, 2] += (width_new - width) / 2  # 因为旋转之后,坐标系原点是新图像的左上角,所以需要根据原图做转化
-    print(matrix)
+    # print(matrix)
     matrix[1, 2] += (height_new - height) / 2
-    print(matrix)
+    # print(matrix)
     res = cv2.warpAffine(img, matrix, (width_new, height_new))
     return res
 

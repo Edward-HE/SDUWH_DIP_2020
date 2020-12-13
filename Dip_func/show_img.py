@@ -2,6 +2,7 @@ import struct
 
 import matplotlib.pyplot as plt
 
+
 # # 读取 lena 图，并显示
 # lena = plt.imread('彩色lena图像256色.BMP')
 # plt.imshow(lena)  # 调用图片显示函数
@@ -20,9 +21,11 @@ import matplotlib.pyplot as plt
 # bmp位图采用小端模式，所以写 <
 # 小端模式是指数据的低位保存在内存的低地址中，而数据的高位保存在内存的高地址中
 # x86是小端
-def bmp_info():
+def bmp_info(filename):
+    with open(filename, 'rb') as f:
+        s = f.read(30)
     unpackbuf = struct.unpack('<ccIIIIIIHH', s)
-    print(unpackbuf)
+    # print(unpackbuf)
     if unpackbuf[0] != b'B' or unpackbuf[1] != b'M':
         return None
     else:
