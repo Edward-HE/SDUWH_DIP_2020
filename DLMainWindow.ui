@@ -199,7 +199,8 @@
     </property>
     <addaction name="action_scale"/>
     <addaction name="action_rotate"/>
-    <addaction name="action_3"/>
+    <addaction name="action_mirror"/>
+    <addaction name="action_translation"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_G"/>
@@ -241,7 +242,7 @@
     <string>旋转</string>
    </property>
   </action>
-  <action name="action_3">
+  <action name="action_mirror">
    <property name="text">
     <string>镜像</string>
    </property>
@@ -249,6 +250,11 @@
   <action name="action_show_info">
    <property name="text">
     <string>显示图像信息</string>
+   </property>
+  </action>
+  <action name="action_translation">
+   <property name="text">
+    <string>平移</string>
    </property>
   </action>
  </widget>

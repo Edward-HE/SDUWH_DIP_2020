@@ -57,6 +57,8 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.SelectImgPushButton.clicked.connect(self.open_image)
         self.action_scale.triggered.connect(self.image_scale)
         self.action_rotate.triggered.connect(self.image_rotate)
+        self.action_mirror.triggered.connect(self.image_mirror)
+        self.action_translation.triggered.connect(self.image_translation)
 
     def win_to_center(self):
         """
@@ -136,6 +138,10 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         Returns:
 
         """
+        if self.src_img_path == "":
+            print("no files!")
+            QMessageBox.information(self, "提示", "未选择！")
+            return
         image_info_dict = show_img.bmp_info(self.src_img_path)
         image_info_list = ""
         for key in image_info_dict:
@@ -143,7 +149,7 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
             image_info_list += list_item
         self.label_info.setText(image_info_list)
 
-    def image_scale(self, multiples):
+    def image_scale(self, scale_multiples=2):
         """
         Desc:
             对图片执行缩放处理
@@ -153,7 +159,7 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         """
         print(self.dst_img.shape)
 
-        self.dst_img = geometric_transformation.img_scale(self.src_img, 2)
+        self.dst_img = geometric_transformation.img_scale(self.src_img, multiples=5)
         print(self.dst_img.shape)
         shrink = cv2.cvtColor(self.dst_img, cv2.COLOR_BGR2RGB)
         dst_q_image = QtGui.QImage(shrink.data,
@@ -163,15 +169,43 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.dst_pix = QtGui.QPixmap.fromImage(dst_q_image)
         self.DstImgLabel.setPixmap(self.dst_pix)
 
-    def image_rotate(self, angle):
-        self.dst_img = geometric_transformation.img_translation(self.src_img, 45)
-        print(self.dst_img.shape)
-        shrink = cv2.cvtColor(self.dst_img, cv2.COLOR_BGR2RGB)
+    def numpy_2_qpixmap(self, img):
+        """
+        Desc:
+            将numpy数组表示的图片转化为QtGui.QPixmap格式，以显示在Qt的GUI界面中
+
+        Args:
+            img: 待转换图片（numpy矩阵））
+
+        Returns:
+
+        """
+        shrink = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         dst_q_image = QtGui.QImage(shrink.data,
                                    shrink.shape[1],
                                    shrink.shape[0],
                                    shrink.shape[1] * 3, QtGui.QImage.Format_RGB888)
-        self.dst_pix = QtGui.QPixmap.fromImage(dst_q_image).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
-                                                                   Qt.KeepAspectRatio,
-                                                                   Qt.SmoothTransformation)
+        dst_qpixmap = QtGui.QPixmap.fromImage(dst_q_image)
+        return dst_qpixmap
+
+    def image_rotate(self, _angle):
+        self.dst_img = geometric_transformation.img_rotate(self.src_img, angle=45)
+        print(self.dst_img.shape)
+        self.dst_pix = self.numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                                 Qt.KeepAspectRatio,
+                                                                 Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_mirror(self, axis):
+        self.dst_img = geometric_transformation.image_mirror(self.src_img, axis=-1)
+        self.dst_pix = self.numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                                 Qt.KeepAspectRatio,
+                                                                 Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_translation(self):
+        self.dst_img = geometric_transformation.img_translation(self.src_img, dx=50, dy=100)
+        self.dst_pix = self.numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                                 Qt.KeepAspectRatio,
+                                                                 Qt.SmoothTransformation)
         self.DstImgLabel.setPixmap(self.dst_pix)

@@ -25,13 +25,14 @@ def img_scale(img, multiples):
     return res
 
 
-def img_translation(img, angle):
+def img_rotate(img, angle):
     height, width = img.shape[:2]
     height_new = int(width * fabs(sin(radians(angle))) + height * fabs(cos(radians(angle))))  # 这个公式参考之前内容
     width_new = int(height * fabs(sin(radians(angle))) + width * fabs(cos(radians(angle))))
     # 获取旋转矩阵，这个函数可以自动求出旋转矩阵
     # 第一个参数是旋转中心，第二个参数是旋转角度，第三个参数是缩放比例
     matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+    print(matrix.dtype)
     # print(matrix.shape)
     # print(matrix)
 
@@ -41,6 +42,34 @@ def img_translation(img, angle):
     # print(matrix)
     res = cv2.warpAffine(img, matrix, (width_new, height_new))
     return res
+
+
+def img_translation(img, dx, dy):
+    rows = img.shape[0]
+    cols = img.shape[1]
+    matrix = np.float32([[1, 0, dx], [0, 1, dy]])
+    res = cv2.warpAffine(img, matrix, (cols, rows))
+    return res
+
+
+def image_mirror(img, axis):
+    """
+    Desc:
+        图像镜像变换函数，使用OpenCV的flip函数
+
+    Args:
+        img: 待处理图像
+        axis: 镜像参数，包括水平、垂直、水平垂直
+            当axis=  1	水平翻转
+                    0	垂直翻转
+                    -1	水平垂直翻转
+
+    Returns:
+        img_dst: 处理后的图像
+    """
+    img_dst = cv2.flip(img, axis)
+
+    return img_dst
 
 # lena = read_img('../彩色lena图像256色.BMP')
 #
