@@ -15,7 +15,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from DLMainWindow import *
 import Dip_func
-from Dip_func import geometric_transformation, gray_histogram, gray_histogram_opencv, Grayscale, show_img
+from Dip_func import geometric_transformation, gray_histogram, gray_histogram_opencv, gray_scale, show_img
 
 
 def read_img_opencv(filename):
@@ -32,6 +32,26 @@ def read_img_opencv(filename):
 
     img = cv2.imdecode(np.fromfile(filename, dtype=np.uint8), -1)
     return img
+
+
+def numpy_2_qpixmap(img):
+    """
+    Desc:
+        将numpy数组表示的图片转化为QtGui.QPixmap格式，以显示在Qt的GUI界面中
+
+    Args:
+        shrink:
+
+    Returns:
+
+    """
+    shrink = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    dst_q_image = QtGui.QImage(shrink.data,
+                               shrink.shape[1],
+                               shrink.shape[0],
+                               shrink.shape[1] * 3, QtGui.QImage.Format_RGB888)
+    dst_qpixmap = QtGui.QPixmap.fromImage(dst_q_image)
+    return dst_qpixmap
 
 
 class DipLabFunc(QMainWindow, Ui_DLMainWindow):
@@ -59,6 +79,7 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.action_rotate.triggered.connect(self.image_rotate)
         self.action_mirror.triggered.connect(self.image_mirror)
         self.action_translation.triggered.connect(self.image_translation)
+        self.action_grayscale.triggered.connect(self.image_grayscale)
 
     def win_to_center(self):
         """
@@ -169,43 +190,34 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.dst_pix = QtGui.QPixmap.fromImage(dst_q_image)
         self.DstImgLabel.setPixmap(self.dst_pix)
 
-    def numpy_2_qpixmap(self, img):
-        """
-        Desc:
-            将numpy数组表示的图片转化为QtGui.QPixmap格式，以显示在Qt的GUI界面中
-
-        Args:
-            img: 待转换图片（numpy矩阵））
-
-        Returns:
-
-        """
-        shrink = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        dst_q_image = QtGui.QImage(shrink.data,
-                                   shrink.shape[1],
-                                   shrink.shape[0],
-                                   shrink.shape[1] * 3, QtGui.QImage.Format_RGB888)
-        dst_qpixmap = QtGui.QPixmap.fromImage(dst_q_image)
-        return dst_qpixmap
-
     def image_rotate(self, _angle):
         self.dst_img = geometric_transformation.img_rotate(self.src_img, angle=45)
         print(self.dst_img.shape)
-        self.dst_pix = self.numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
-                                                                 Qt.KeepAspectRatio,
-                                                                 Qt.SmoothTransformation)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_mirror(self, axis):
         self.dst_img = geometric_transformation.image_mirror(self.src_img, axis=-1)
-        self.dst_pix = self.numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
-                                                                 Qt.KeepAspectRatio,
-                                                                 Qt.SmoothTransformation)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_translation(self):
         self.dst_img = geometric_transformation.img_translation(self.src_img, dx=50, dy=100)
-        self.dst_pix = self.numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
-                                                                 Qt.KeepAspectRatio,
-                                                                 Qt.SmoothTransformation)
+        print(self.dst_img.dtype)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_grayscale(self, method="weighted_average"):
+
+        self.dst_img = gray_scale.method_choose(self.src_img, method="weighted_average", color="R")
+        self.dst_img = self.dst_img.astype(np.uint8)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
         self.DstImgLabel.setPixmap(self.dst_pix)

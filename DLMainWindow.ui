@@ -181,7 +181,7 @@
      <x>0</x>
      <y>0</y>
      <width>1333</width>
-     <height>34</height>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu">
@@ -202,8 +202,35 @@
     <addaction name="action_mirror"/>
     <addaction name="action_translation"/>
    </widget>
+   <widget class="QMenu" name="menu_H">
+    <property name="title">
+     <string>灰度变换(H)</string>
+    </property>
+    <addaction name="action_grayscale"/>
+    <addaction name="action_hist"/>
+    <addaction name="action_balance"/>
+   </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>噪声抑制</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_4">
+    <property name="title">
+     <string>锐化与边缘检测</string>
+    </property>
+   </widget>
+   <widget class="QMenu" name="menu_5">
+    <property name="title">
+     <string>图像分割</string>
+    </property>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_G"/>
+   <addaction name="menu_H"/>
+   <addaction name="menu_3"/>
+   <addaction name="menu_4"/>
+   <addaction name="menu_5"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
   <widget class="QToolBar" name="toolBar">
@@ -255,6 +282,21 @@
   <action name="action_translation">
    <property name="text">
     <string>平移</string>
+   </property>
+  </action>
+  <action name="action_grayscale">
+   <property name="text">
+    <string>灰度化</string>
+   </property>
+  </action>
+  <action name="action_hist">
+   <property name="text">
+    <string>绘制灰度直方图</string>
+   </property>
+  </action>
+  <action name="action_balance">
+   <property name="text">
+    <string>直方图均衡化</string>
    </property>
   </action>
  </widget>
