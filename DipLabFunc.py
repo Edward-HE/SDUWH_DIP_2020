@@ -15,7 +15,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from DLMainWindow import *
 import Dip_func
-from Dip_func import geometric_transformation, gray_histogram, gray_scale, show_img, add_noise, denoise
+from Dip_func import geometric_transformation, gray_histogram, gray_scale, show_img, add_noise, denoise, edge_detection
 
 
 def read_img_opencv(filename):
@@ -54,6 +54,10 @@ def numpy_2_qpixmap(img):
     return dst_qpixmap
 
 
+def exit_program():
+    exit(0)
+
+
 class DipLabFunc(QMainWindow, Ui_DLMainWindow):
 
     def __init__(self, parent=None):
@@ -74,6 +78,8 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
 
         self.action_show_info.triggered.connect(self.show_image_info)
         self.action_O.triggered.connect(self.open_image)
+        self.action_S.triggered.connect(self.save_image)
+        self.action_E.triggered.connect(exit_program)
         self.SelectImgPushButton.clicked.connect(self.open_image)
         self.action_scale.triggered.connect(lambda: self.image_scale(scale_multiples=5))
         self.action_rotate.triggered.connect(lambda: self.image_rotate())
@@ -86,6 +92,9 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.action_sp.triggered.connect(lambda: self.image_add_noise(method='salt_pepper'))
         self.action_dn_mean.triggered.connect(lambda: self.image_de_noise(method='mean'))
         self.action_dn_median.triggered.connect(lambda: self.image_de_noise(method='median'))
+        self.action_robert.triggered.connect(lambda: self.image_edge_detection(method='robert'))
+        self.action_sobel.triggered.connect(lambda: self.image_edge_detection(method='sobel'))
+        self.action_canny.triggered.connect(lambda: self.image_edge_detection(method='canny'))
 
     def win_to_center(self):
         """
@@ -130,6 +139,13 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
                                         Qt.SmoothTransformation)
             self.SrcImgLabel.setPixmap(image)
             self.DstImgLabel.setPixmap(image)
+
+    def save_image(self):  # 保存图片到本地
+        # screen = QApplication.primaryScreen()
+        # pix = screen.grabWindow(self.label.winId())
+        fd, type_1 = QFileDialog.getSaveFileName(self.centralwidget, "保存图片", "", "*.jpg;;*.png;;*.bmp;;All Files(*)")
+        # pix.save(fd)
+        cv2.imwrite(fd, self.dst_img)  # 保存图片
 
     def resizeEvent(self, QResizeEvent):
         """
@@ -246,7 +262,7 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
                                                             Qt.SmoothTransformation)
         self.DstImgLabel.setPixmap(self.dst_pix)
 
-    def image_add_noise(self, method='gaussian', mean=0, var=0.001, prob=0.01):
+    def image_add_noise(self, method='gaussian', mean=0, var=20, prob=0.01):
         self.dst_img = add_noise.method_choose(self.src_img, method, mean, var, prob)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
@@ -255,6 +271,13 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
 
     def image_de_noise(self, method='mean', kernel_m=3, kernel_n=3):
         self.dst_img = denoise.method_choose(self.src_img, method, kernel_m, kernel_n)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_edge_detection(self, method='robert'):
+        self.dst_img = edge_detection.method_choose(self.src_img, method)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
                                                             Qt.SmoothTransformation)

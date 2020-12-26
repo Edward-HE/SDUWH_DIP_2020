@@ -85,6 +85,8 @@ if __name__ == '__main__':
     hist_rgb = draw_hist_rgb(img_input)
     hist_gray = draw_hist_gray(img_input)
     print(hist_gray.shape)
+    gray_eq = hist_equalize_gray(img_input)
+    cv2.imshow('gray_eq', gray_eq)
     cv2.imshow('gray', hist_gray)
     cv2.imshow('rgb', hist_rgb)
     cv2.waitKey(0)

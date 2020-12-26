@@ -21,17 +21,33 @@ def method_choose(img, method, mean, var, prob):
     return result
 
 
-def add_gaussian(img, mean=0, var=0.001):
-    img = np.array(img / 255, dtype=float)
-    noise = np.random.normal(mean, var ** 0.5, img.shape)
-    out = img + noise
-    if out.min() < 0:
-        low_clip = -1.
+def clamp(pv):
+    if pv > 255:
+        return 255
+    elif pv < 0:
+        return 0
     else:
-        low_clip = 0.
-    out = np.clip(out, low_clip, 1.0)
-    out = np.uint8(out * 255)
-    return out
+        return pv
+
+
+def add_gaussian(img, mean=0, var=20):
+    h, w, c = img.shape
+    for row in range(h):
+        for col in range(w):
+            # 获取三个高斯随机数
+            # 第一个参数：概率分布的均值，对应着整个分布的中心
+            # 第二个参数：概率分布的标准差，对应于分布的宽度
+            # 第三个参数：生成高斯随机数数量
+            s = np.random.normal(loc=mean, scale=var, size=3)
+            # 获取每个像素点的bgr值
+            b = img[row, col, 0]  # blue
+            g = img[row, col, 1]  # green
+            r = img[row, col, 2]  # red\
+            # 给每个像素值设置新的bgr值
+            img[row, col, 0] = clamp(b + s[0])
+            img[row, col, 1] = clamp(g + s[1])
+            img[row, col, 2] = clamp(r + s[2])
+    return img
 
 
 def add_salt_pepper(img, prob):
