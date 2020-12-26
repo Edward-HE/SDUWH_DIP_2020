@@ -210,10 +210,26 @@
     <addaction name="action_hist"/>
     <addaction name="action_balance"/>
    </widget>
-   <widget class="QMenu" name="menu_3">
+   <widget class="QMenu" name="menu_N">
     <property name="title">
-     <string>噪声抑制</string>
+     <string>噪声抑制(N)</string>
     </property>
+    <widget class="QMenu" name="menu_addnoise">
+     <property name="title">
+      <string>添加噪声</string>
+     </property>
+     <addaction name="action_gauss"/>
+     <addaction name="action_sp"/>
+    </widget>
+    <widget class="QMenu" name="menu_denoise">
+     <property name="title">
+      <string>去噪声</string>
+     </property>
+     <addaction name="action_dn_mean"/>
+     <addaction name="action_dn_median"/>
+    </widget>
+    <addaction name="menu_addnoise"/>
+    <addaction name="menu_denoise"/>
    </widget>
    <widget class="QMenu" name="menu_4">
     <property name="title">
@@ -228,7 +244,7 @@
    <addaction name="menu"/>
    <addaction name="menu_G"/>
    <addaction name="menu_H"/>
-   <addaction name="menu_3"/>
+   <addaction name="menu_N"/>
    <addaction name="menu_4"/>
    <addaction name="menu_5"/>
   </widget>
@@ -297,6 +313,26 @@
   <action name="action_balance">
    <property name="text">
     <string>直方图均衡化</string>
+   </property>
+  </action>
+  <action name="action_gauss">
+   <property name="text">
+    <string>添加高斯噪声</string>
+   </property>
+  </action>
+  <action name="action_sp">
+   <property name="text">
+    <string>添加椒盐噪声</string>
+   </property>
+  </action>
+  <action name="action_dn_mean">
+   <property name="text">
+    <string>均值滤波去噪</string>
+   </property>
+  </action>
+  <action name="action_dn_median">
+   <property name="text">
+    <string>中值滤波去噪</string>
    </property>
   </action>
  </widget>

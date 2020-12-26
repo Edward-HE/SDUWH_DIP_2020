@@ -15,7 +15,7 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from DLMainWindow import *
 import Dip_func
-from Dip_func import geometric_transformation, gray_histogram, gray_histogram_opencv, gray_scale, show_img
+from Dip_func import geometric_transformation, gray_histogram, gray_scale, show_img, add_noise, denoise
 
 
 def read_img_opencv(filename):
@@ -75,11 +75,17 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.action_show_info.triggered.connect(self.show_image_info)
         self.action_O.triggered.connect(self.open_image)
         self.SelectImgPushButton.clicked.connect(self.open_image)
-        self.action_scale.triggered.connect(self.image_scale)
-        self.action_rotate.triggered.connect(self.image_rotate)
-        self.action_mirror.triggered.connect(self.image_mirror)
-        self.action_translation.triggered.connect(self.image_translation)
-        self.action_grayscale.triggered.connect(self.image_grayscale)
+        self.action_scale.triggered.connect(lambda: self.image_scale(scale_multiples=5))
+        self.action_rotate.triggered.connect(lambda: self.image_rotate())
+        self.action_mirror.triggered.connect(lambda: self.image_mirror())
+        self.action_translation.triggered.connect(lambda: self.image_translation())
+        self.action_grayscale.triggered.connect(lambda: self.image_grayscale(method="weighted_average"))
+        self.action_hist.triggered.connect(lambda: self.image_draw_hist())
+        self.action_balance.triggered.connect(lambda: self.image_hist_equal())
+        self.action_gauss.triggered.connect(lambda: self.image_add_noise(method='gaussian'))
+        self.action_sp.triggered.connect(lambda: self.image_add_noise(method='salt_pepper'))
+        self.action_dn_mean.triggered.connect(lambda: self.image_de_noise(method='mean'))
+        self.action_dn_median.triggered.connect(lambda: self.image_de_noise(method='median'))
 
     def win_to_center(self):
         """
@@ -108,7 +114,7 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
 
         """
         self.src_img_path, file_type = QFileDialog.getOpenFileName(self, "选择图片", ".",
-                                                                   "Image Files(*jpg *.jpeg *.png *.bmp;;All Files(*)")
+                                                                   "Image Files(*.jpg *.jpeg *.png *.bmp;;All Files(*)")
         if len(self.src_img_path) == 0:
             return
         self.ExpImgLineEdit.setText(self.src_img_path)
@@ -149,7 +155,9 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
             image = self.src_pix.scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(), Qt.KeepAspectRatio,
                                         Qt.SmoothTransformation)
             self.SrcImgLabel.setPixmap(image)
-            # self.DstImgLabel.setPixmap(image)
+            image = self.dst_pix.scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(), Qt.KeepAspectRatio,
+                                        Qt.SmoothTransformation)
+            self.DstImgLabel.setPixmap(image)
 
     def show_image_info(self):
         """
@@ -180,7 +188,7 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         """
         print(self.dst_img.shape)
 
-        self.dst_img = geometric_transformation.img_scale(self.src_img, multiples=5)
+        self.dst_img = geometric_transformation.img_scale(self.src_img, multiples=scale_multiples)
         print(self.dst_img.shape)
         shrink = cv2.cvtColor(self.dst_img, cv2.COLOR_BGR2RGB)
         dst_q_image = QtGui.QImage(shrink.data,
@@ -190,33 +198,63 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.dst_pix = QtGui.QPixmap.fromImage(dst_q_image)
         self.DstImgLabel.setPixmap(self.dst_pix)
 
-    def image_rotate(self, _angle):
-        self.dst_img = geometric_transformation.img_rotate(self.src_img, angle=45)
+    def image_rotate(self, angle=45):
+        self.dst_img = geometric_transformation.img_rotate(self.src_img, angle)
         print(self.dst_img.shape)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
                                                             Qt.SmoothTransformation)
         self.DstImgLabel.setPixmap(self.dst_pix)
 
-    def image_mirror(self, axis):
-        self.dst_img = geometric_transformation.image_mirror(self.src_img, axis=-1)
+    def image_mirror(self, axis=-1):
+        self.dst_img = geometric_transformation.image_mirror(self.src_img, axis)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
                                                             Qt.SmoothTransformation)
         self.DstImgLabel.setPixmap(self.dst_pix)
 
-    def image_translation(self):
-        self.dst_img = geometric_transformation.img_translation(self.src_img, dx=50, dy=100)
+    def image_translation(self, dx=50, dy=100):
+        self.dst_img = geometric_transformation.img_translation(self.src_img, dx, dy)
         print(self.dst_img.dtype)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
                                                             Qt.SmoothTransformation)
         self.DstImgLabel.setPixmap(self.dst_pix)
 
-    def image_grayscale(self, method="weighted_average"):
+    def image_grayscale(self, method="weighted_average", color="R"):
 
-        self.dst_img = gray_scale.method_choose(self.src_img, method="weighted_average", color="R")
+        self.dst_img = gray_scale.method_choose(self.src_img, method, color)
         self.dst_img = self.dst_img.astype(np.uint8)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_draw_hist(self, method='hist_rgb'):
+
+        self.dst_img = gray_histogram.method_choose(self.src_img, method)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+        # self.DstImgLabel.setScaledContents(True)
+
+    def image_hist_equal(self, method='hist_equal_gray'):
+        self.dst_img = gray_histogram.method_choose(self.src_img, method)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_add_noise(self, method='gaussian', mean=0, var=0.001, prob=0.01):
+        self.dst_img = add_noise.method_choose(self.src_img, method, mean, var, prob)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_de_noise(self, method='mean', kernel_m=3, kernel_n=3):
+        self.dst_img = denoise.method_choose(self.src_img, method, kernel_m, kernel_n)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
                                                             Qt.SmoothTransformation)
