@@ -10,15 +10,14 @@ Desc    :
 
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QWidget, QDesktopWidget, QDialog
-from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
-from DLMainWindow import *
-import Dip_func
-from Dip_func import add_noise, denoise, edge_detection, geometric_transformation
-from Dip_func import gray_histogram, gray_scale, img_segment, show_img
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QDesktopWidget, QDialog
 
 import scale
+from DLMainWindow import *
+from Dip_func import add_noise, denoise, edge_detection, geometric_transformation
+from Dip_func import gray_histogram, gray_scale, img_segment, show_img
 
 
 def read_img_opencv(filename):
@@ -86,9 +85,7 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.action_S.triggered.connect(self.save_image)
         self.action_E.triggered.connect(exit_program)
         self.SelectImgPushButton.clicked.connect(self.open_image)
-
-        self.action_scale.triggered.connect(lambda: self.openscale)
-
+        self.action_scale.triggered.connect(lambda: self.openscale())
         self.action_rotate.triggered.connect(lambda: self.image_rotate())
         self.action_mirror.triggered.connect(lambda: self.image_mirror())
         self.action_translation.triggered.connect(lambda: self.image_translation())
