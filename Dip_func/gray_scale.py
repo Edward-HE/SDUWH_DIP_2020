@@ -4,7 +4,7 @@ import numpy as np
 # 读取 img 图，并显示
 def get_rgb(img):
     r, g, b = [img[:, :, i] for i in range(3)]
-    alpha = np.ones((256, 256, 1)) * 255
+    # alpha = np.ones((256, 256, 1)) * 255
     return r, g, b
 
 
@@ -46,13 +46,14 @@ def weight(img, color):
     Returns:
 
     """
+    height, width = img.shape[:2]
     r, g, b = get_rgb(img)
     if color == 'R':
-        rgb = np.reshape(r, (256, 256, 1))
+        rgb = np.reshape(r, (height, width, 1))
     elif color == 'G':
-        rgb = np.reshape(g, (256, 256, 1))
+        rgb = np.reshape(g, (height, width, 1))
     elif color == 'B':
-        rgb = np.reshape(b, (256, 256, 1))
+        rgb = np.reshape(b, (height, width, 1))
     else:
         print("分量选择错误，请输入R,G,B中的一个")
         exit()
@@ -72,9 +73,10 @@ def max_rgb(img):
     Returns:
 
     """
+    height, width = img.shape[:2]
     r, g, b = get_rgb(img)
     rgb = np.max(img[:, :, :3], axis=2)
-    rgb = np.reshape(rgb, (256, 256, 1))
+    rgb = np.reshape(rgb, (height, width, 1))
     img_gray_max = np.concatenate([rgb, rgb, rgb], axis=2).astype(int)
     return img_gray_max
 
@@ -90,9 +92,10 @@ def average_rgb(img):
     Returns:
 
     """
+    height, width = img.shape[:2]
     r, g, b = get_rgb(img)
     rgb = np.average(img[:, :, :3], axis=2)
-    rgb = np.reshape(rgb, (256, 256, 1))
+    rgb = np.reshape(rgb, (height, width, 1))
     img_gray_average = np.concatenate([rgb, rgb, rgb], axis=2).astype(int)
     return img_gray_average
 
@@ -110,9 +113,10 @@ def weighted_average(img):
     Returns:
 
     """
+    height, width = img.shape[:2]
     r, g, b = get_rgb(img)
     rgb = r * 0.299 + g * 0.587 + b * 0.114
-    rgb = np.reshape(rgb, (256, 256, 1))
+    rgb = np.reshape(rgb, (height, width, 1))
     img_gray_wa = np.concatenate([rgb, rgb, rgb], axis=2)
     # img_gray_wa /= 255
     return img_gray_wa

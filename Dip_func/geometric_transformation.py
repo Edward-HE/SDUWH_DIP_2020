@@ -45,6 +45,18 @@ def img_rotate(img, angle):
 
 
 def img_translation(img, dx, dy):
+    """
+    Desc:
+        平移函数，通过仿射变换实现平移操作
+
+    Args:
+        img:
+        dx:
+        dy:
+
+    Returns:
+
+    """
     rows = img.shape[0]
     cols = img.shape[1]
     matrix = np.float32([[1, 0, dx], [0, 1, dy]])

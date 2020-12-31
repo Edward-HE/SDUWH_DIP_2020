@@ -10,6 +10,7 @@ Desc    :
 import numpy as np
 import cv2
 import random
+from joblib import Parallel, delayed
 
 
 def method_choose(img, method, mean, var, prob):
@@ -32,6 +33,7 @@ def clamp(pv):
 
 def add_gaussian(img, mean=0, var=20):
     h, w, c = img.shape
+
     for row in range(h):
         for col in range(w):
             # 获取三个高斯随机数
@@ -42,11 +44,13 @@ def add_gaussian(img, mean=0, var=20):
             # 获取每个像素点的bgr值
             b = img[row, col, 0]  # blue
             g = img[row, col, 1]  # green
-            r = img[row, col, 2]  # red\
+            r = img[row, col, 2]  # red
             # 给每个像素值设置新的bgr值
             img[row, col, 0] = clamp(b + s[0])
             img[row, col, 1] = clamp(g + s[1])
             img[row, col, 2] = clamp(r + s[2])
+        if row % 10 == 0:
+            print("{:%}".format(row / h))
     return img
 
 

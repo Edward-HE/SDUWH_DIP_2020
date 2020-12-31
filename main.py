@@ -8,7 +8,7 @@ Software: PyCharm
 Desc    :
 """
 import sys
-from DipLabFunc import *
+from func_center import *
 from PyQt5.QtWidgets import QApplication
 
 if __name__ == '__main__':

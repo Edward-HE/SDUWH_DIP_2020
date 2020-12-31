@@ -3,19 +3,22 @@ Time    : 2020/12/9 上午12:28
 Author  : Edward-du
 Contact : duchenhe@outlook.com
 Project : DIP
-File    : DipLabFunc.py
+File    : func_center.py
 Software: PyCharm
 Desc    :
 """
 
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QWidget, QDesktopWidget
+from PyQt5.QtWidgets import QMainWindow, QFileDialog, QMessageBox, QWidget, QDesktopWidget, QDialog
 from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import Qt
 from DLMainWindow import *
 import Dip_func
-from Dip_func import geometric_transformation, gray_histogram, gray_scale, show_img, add_noise, denoise, edge_detection
+from Dip_func import add_noise, denoise, edge_detection, geometric_transformation
+from Dip_func import gray_histogram, gray_scale, img_segment, show_img
+
+import scale
 
 
 def read_img_opencv(filename):
@@ -40,7 +43,7 @@ def numpy_2_qpixmap(img):
         将numpy数组表示的图片转化为QtGui.QPixmap格式，以显示在Qt的GUI界面中
 
     Args:
-        shrink:
+        img:
 
     Returns:
 
@@ -76,12 +79,16 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.src_pix = QPixmap()
         self.dst_pix = QPixmap()
 
+        self.a1 = QDialog()  # scale
+
         self.action_show_info.triggered.connect(self.show_image_info)
         self.action_O.triggered.connect(self.open_image)
         self.action_S.triggered.connect(self.save_image)
         self.action_E.triggered.connect(exit_program)
         self.SelectImgPushButton.clicked.connect(self.open_image)
-        self.action_scale.triggered.connect(lambda: self.image_scale(scale_multiples=5))
+
+        self.action_scale.triggered.connect(lambda: self.openscale)
+
         self.action_rotate.triggered.connect(lambda: self.image_rotate())
         self.action_mirror.triggered.connect(lambda: self.image_mirror())
         self.action_translation.triggered.connect(lambda: self.image_translation())
@@ -95,6 +102,8 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.action_robert.triggered.connect(lambda: self.image_edge_detection(method='robert'))
         self.action_sobel.triggered.connect(lambda: self.image_edge_detection(method='sobel'))
         self.action_canny.triggered.connect(lambda: self.image_edge_detection(method='canny'))
+        self.action_thresh_global.triggered.connect(lambda: self.image_segment(method='global'))
+        self.action_thresh_adptive.triggered.connect(lambda: self.image_threshold_adaptive())
 
     def win_to_center(self):
         """
@@ -114,6 +123,11 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         # 移动到居中位置
         self.move(new_x, new_y)
 
+    def warning_no_file(self):
+        if self.src_img_path == "":
+            QMessageBox.warning(self, "注意", "未选择图片！\n请先选择图片")
+            return 1
+
     def open_image(self):
         """
         Desc:
@@ -123,7 +137,8 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
 
         """
         self.src_img_path, file_type = QFileDialog.getOpenFileName(self, "选择图片", ".",
-                                                                   "Image Files(*.jpg *.jpeg *.png *.bmp;;All Files(*)")
+                                                                   "Image Files(*.jpeg *.jpeg *.jpg *.png *.bmp;;All "
+                                                                   "Files(*)")
         if len(self.src_img_path) == 0:
             return
         self.ExpImgLineEdit.setText(self.src_img_path)
@@ -183,18 +198,22 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         Returns:
 
         """
-        if self.src_img_path == "":
-            print("no files!")
-            QMessageBox.information(self, "提示", "未选择！")
+        if self.warning_no_file() == 1:
             return
         image_info_dict = show_img.bmp_info(self.src_img_path)
         image_info_list = ""
         for key in image_info_dict:
-            list_item = str(key) + ':' + str(image_info_dict[key]) + '\n'
+            list_item = str(key) + ': \t\t ' + str(image_info_dict[key]) + '\n'
             image_info_list += list_item
         self.label_info.setText(image_info_list)
 
-    def image_scale(self, scale_multiples=2):
+    def openscale(self):
+        a = scale.Ui_scale()
+        a.setupUi(self.a1)
+        self.a1.show()
+        self.a1.accepted.connect(lambda: self.image_scale(a))
+
+    def image_scale(self, a):
         """
         Desc:
             对图片执行缩放处理
@@ -202,9 +221,12 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         Returns:
 
         """
-        print(self.dst_img.shape)
+        multiples = a.lineEdit.text()
+        if self.warning_no_file() == 1:
+            return
 
-        self.dst_img = geometric_transformation.img_scale(self.src_img, multiples=scale_multiples)
+        print(self.dst_img.shape)
+        self.dst_img = geometric_transformation.img_scale(self.src_img, multiples=float(multiples))
         print(self.dst_img.shape)
         shrink = cv2.cvtColor(self.dst_img, cv2.COLOR_BGR2RGB)
         dst_q_image = QtGui.QImage(shrink.data,
@@ -215,6 +237,9 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_rotate(self, angle=45):
+        if self.warning_no_file() == 1:
+            return
+
         self.dst_img = geometric_transformation.img_rotate(self.src_img, angle)
         print(self.dst_img.shape)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
@@ -223,6 +248,9 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_mirror(self, axis=-1):
+        if self.warning_no_file() == 1:
+            return
+
         self.dst_img = geometric_transformation.image_mirror(self.src_img, axis)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
@@ -230,6 +258,9 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_translation(self, dx=50, dy=100):
+        if self.warning_no_file() == 1:
+            return
+
         self.dst_img = geometric_transformation.img_translation(self.src_img, dx, dy)
         print(self.dst_img.dtype)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
@@ -238,6 +269,8 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_grayscale(self, method="weighted_average", color="R"):
+        if self.warning_no_file() == 1:
+            return
 
         self.dst_img = gray_scale.method_choose(self.src_img, method, color)
         self.dst_img = self.dst_img.astype(np.uint8)
@@ -247,6 +280,8 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_draw_hist(self, method='hist_rgb'):
+        if self.warning_no_file() == 1:
+            return
 
         self.dst_img = gray_histogram.method_choose(self.src_img, method)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
@@ -256,6 +291,9 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         # self.DstImgLabel.setScaledContents(True)
 
     def image_hist_equal(self, method='hist_equal_gray'):
+        if self.warning_no_file() == 1:
+            return
+
         self.dst_img = gray_histogram.method_choose(self.src_img, method)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
@@ -263,6 +301,9 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_add_noise(self, method='gaussian', mean=0, var=20, prob=0.01):
+        if self.warning_no_file() == 1:
+            return
+
         self.dst_img = add_noise.method_choose(self.src_img, method, mean, var, prob)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
@@ -270,6 +311,9 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_de_noise(self, method='mean', kernel_m=3, kernel_n=3):
+        if self.warning_no_file() == 1:
+            return
+
         self.dst_img = denoise.method_choose(self.src_img, method, kernel_m, kernel_n)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
@@ -277,7 +321,30 @@ class DipLabFunc(QMainWindow, Ui_DLMainWindow):
         self.DstImgLabel.setPixmap(self.dst_pix)
 
     def image_edge_detection(self, method='robert'):
+        if self.warning_no_file() == 1:
+            return
+
         self.dst_img = edge_detection.method_choose(self.src_img, method)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_segment(self, method, thresh=111):
+        if self.warning_no_file() == 1:
+            return
+
+        self.dst_img = img_segment.method_choose(self.src_img, method, thresh)
+        self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
+                                                            Qt.KeepAspectRatio,
+                                                            Qt.SmoothTransformation)
+        self.DstImgLabel.setPixmap(self.dst_pix)
+
+    def image_threshold_adaptive(self, ada_method=cv2.ADAPTIVE_THRESH_MEAN_C, block_size=5, c=2):
+        if self.warning_no_file() == 1:
+            return
+
+        self.dst_img = img_segment.threshold_adaptive(self.src_img, ada_method, block_size, c)
         self.dst_pix = numpy_2_qpixmap(self.dst_img).scaled(self.SrcImgLabel.width(), self.SrcImgLabel.height(),
                                                             Qt.KeepAspectRatio,
                                                             Qt.SmoothTransformation)
